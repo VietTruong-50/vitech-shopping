@@ -32,10 +32,10 @@ public class SecurityConfiguration {
     private final RequestFilter jwtAuthenticationFilter;
     private final UserService userService;
 
-    private final String[] publicEndpoints = new String[]{"/v1/shopping/customer/auth/**",
+    private final String[] publicEndpoints = new String[]{"/customer/auth/**",
             "/actuator/**", "/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**",
-            "/v1/shopping/category/**", "/v1/shopping/product/**", "/v1/shopping/sub-category/**",
-            "/v1/shopping/cart/**", "/v1/shopping/tag/**", "/v1/shopping/customer/comment/list-filter"};
+            "/category/**", "/product/**", "/sub-category/**",
+            "/cart/**", "/tag/**", "/customer/comment/list-filter"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

@@ -12,7 +12,7 @@ import vn.vnpt.common.AbstractResponseController;
 import java.util.Collections;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1/shopping/cart")
+@RequestMapping("/cart")
 @RestController
 @Slf4j
 public class CartController extends AbstractResponseController {

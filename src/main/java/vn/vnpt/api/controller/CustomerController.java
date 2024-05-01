@@ -18,7 +18,7 @@ import vn.vnpt.common.model.SortPageIn;
 import java.util.Collections;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1/shopping/customer")
+@RequestMapping("/customer")
 @RestController
 @Slf4j
 public class CustomerController extends AbstractResponseController {

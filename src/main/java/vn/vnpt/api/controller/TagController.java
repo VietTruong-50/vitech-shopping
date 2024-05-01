@@ -12,7 +12,7 @@ import vn.vnpt.common.AbstractResponseController;
 import vn.vnpt.common.model.SortPageIn;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1/shopping/tag")
+@RequestMapping("/tag")
 @RestController
 @Slf4j
 public class TagController extends AbstractResponseController {

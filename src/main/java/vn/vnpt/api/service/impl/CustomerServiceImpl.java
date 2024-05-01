@@ -22,6 +22,7 @@ import vn.vnpt.api.dto.out.customter.UpdateProfileIn;
 import vn.vnpt.api.model.User;
 import vn.vnpt.api.repository.CustomerRepository;
 import vn.vnpt.api.repository.UserRepository;
+import vn.vnpt.api.service.CartService;
 import vn.vnpt.api.service.CustomerService;
 import vn.vnpt.authentication.jwt.JwtService;
 import vn.vnpt.common.model.PagingOut;
@@ -40,6 +41,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
+    private final CartService cartService;
 
     @Override
     public JwtAuthenticationResponse signup(SignUpRequest request) {
@@ -55,11 +57,17 @@ public class CustomerServiceImpl implements CustomerService {
     public JwtAuthenticationResponse signin(SigninRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        System.out.println(request);
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Tài khoản hoặc mật khẩu không chính xác"));
 
         var jwt = jwtService.generateToken(user);
+
+        try {
+            cartService.loadSessionCartIntoUserCart(user.getId(), request.getSessionToken());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return JwtAuthenticationResponse.builder().token(jwt).build();
     }
 
@@ -122,7 +130,7 @@ public class CustomerServiceImpl implements CustomerService {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         Optional<User> user = userRepository.findByEmail(authentication.getName());
-         customerRepository.updateProfile(updateProfileIn, user.get().getId());
+        customerRepository.updateProfile(updateProfileIn, user.get().getId());
     }
 
     @Override
@@ -139,11 +147,11 @@ public class CustomerServiceImpl implements CustomerService {
         Authentication authentication = securityContext.getAuthentication();
         Optional<User> user = userRepository.findByEmail(authentication.getName());
 
-        customerRepository.deleteReview(commentId,  user.get().getId());
+        customerRepository.deleteReview(commentId, user.get().getId());
     }
 
     @Override
     public PagingOut<ReviewListOut> getProductComments(String productId, SortPageIn sortPageIn) {
-        return  customerRepository.getProductReviews(productId, sortPageIn);
+        return customerRepository.getProductReviews(productId, sortPageIn);
     }
 }

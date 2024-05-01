@@ -6,6 +6,8 @@ import vn.vnpt.api.dto.in.address.CreateUpdateAddressIn;
 import vn.vnpt.api.dto.in.review.CreateReviewIn;
 import vn.vnpt.api.dto.out.address.AddressDetailOut;
 import vn.vnpt.api.dto.out.address.AddressListOut;
+import vn.vnpt.api.dto.out.customter.CustomerListOut;
+import vn.vnpt.api.dto.out.recommend.ClickData;
 import vn.vnpt.api.dto.out.review.ReviewListOut;
 import vn.vnpt.api.dto.out.customter.UpdateProfileIn;
 import vn.vnpt.api.repository.helper.ProcedureCallerV3;
@@ -189,5 +191,36 @@ public class CustomerRepository {
         List<ReviewListOut> outList = (List<ReviewListOut>) outputs.get("out_cur");
 
         return PagingOut.of((Number) outputs.get("out_total"), sortPageIn, outList);
+    }
+
+    public PagingOut<CustomerListOut> findAllCustomers(SortPageIn sortPageIn) {
+        Map<String, Object> outputs = procedureCallerV3.callOneRefCursor("customer_list_filter",
+                List.of(
+                        ProcedureParameter.inputParam("prs_properties_sort", String.class, sortPageIn.getPropertiesSort()),
+                        ProcedureParameter.inputParam("prs_sort", String.class, sortPageIn.getSort()),
+                        ProcedureParameter.inputParam("prn_page_index", Integer.class, sortPageIn.getPage()),
+                        ProcedureParameter.inputParam("prn_page_size", Integer.class, sortPageIn.getMaxSize()),
+                        ProcedureParameter.inputParam("prs_key_search", String.class, sortPageIn.getKeySearch()),
+                        ProcedureParameter.outputParam("out_total", Long.class),
+                        ProcedureParameter.outputParam("out_result", String.class),
+                        ProcedureParameter.refCursorParam("out_cur")
+                ), CustomerListOut.class
+        );
+
+        List<CustomerListOut> outList = (List<CustomerListOut>) outputs.get("out_cur");
+
+        return PagingOut.of((Number) outputs.get("out_total"), sortPageIn, outList);
+    }
+
+    public List<ClickData> getUserClickProductDetail(String userId) {
+        Map<String, Object> outputs = procedureCallerV3.callOneRefCursor("get_user_click_product_detail",
+                List.of(
+                        ProcedureParameter.inputParam("prs_user_id", String.class, userId),
+                          ProcedureParameter.outputParam("out_result", String.class),
+                        ProcedureParameter.refCursorParam("out_cur")
+                ), ClickData.class
+        );
+
+        return (List<ClickData>) outputs.get("out_cur");
     }
 }

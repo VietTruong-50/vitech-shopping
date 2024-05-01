@@ -107,7 +107,7 @@ springdoc:
 ---
 token:
   signin:
-    key: 413F4428472B4B6250655368566D5970337336763979244226452948404D6351213421312312312321312awdfada
+    key: ${TOKEN_SIGNIN_KEY:413F4428472B4B6250655368566D5970337336763979244226452948404D6351213421312312312321312awdfada}
 ---
 spring:
   kafka:
@@ -116,4 +116,4 @@ spring:
       key-serializer: ${KEY_SERIALIZER:org.apache.kafka.common.serialization.StringSerializer}
       value-serializer: ${VALUE_SERIALIZER:org.springframework.kafka.support.serializer.JsonSerializer}
     template:
-      default-topic: order-statistic
+      default-topic: ${DEFAULT_TOPIC:order-statistic}

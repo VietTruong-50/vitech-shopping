@@ -81,21 +81,13 @@ public class CartServiceImpl implements CartService {
         Authentication authentication = securityContext.getAuthentication();
         Optional<User> user = userRepository.findByEmail(authentication.getName());
 
-        var rs = user.map(value -> new CartDetailOut(hashOperations.entries(CART_KEY + ":" + value.getId()))).orElse(null);
-
-        if (!Common.isNullOrEmpty(sessionToken)) {
-            var sessionCart = new CartDetailOut(hashOperations.entries(CART_KEY + ":" + sessionToken));
-            // Load session cart data into user's cart if it exists
-            if(Common.isNullOrEmpty(rs)){
-                user.ifPresent(value -> loadSessionCartIntoUserCart(sessionCart, value.getId(), sessionToken));
-            }
-            return sessionCart;
-        }
-
-        return rs;
+        return user.map(value -> new CartDetailOut(hashOperations.entries(CART_KEY + ":" + value.getId()))).orElseGet(() -> new CartDetailOut(hashOperations.entries(CART_KEY + ":" + sessionToken)));
     }
 
-    private void loadSessionCartIntoUserCart(CartDetailOut sessionCart, String userId, String sessionToken) {
+    @Override
+    public void loadSessionCartIntoUserCart(String userId, String sessionToken) {
+        var sessionCart = new CartDetailOut(hashOperations.entries(CART_KEY + ":" + sessionToken));
+
         if (Boolean.TRUE.equals(redisTemplate.hasKey(CART_KEY + ":" + userId))) {
             redisTemplate.delete(CART_KEY + ":" + userId);
         }

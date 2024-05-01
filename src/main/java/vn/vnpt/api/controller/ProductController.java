@@ -11,7 +11,7 @@ import vn.vnpt.common.AbstractResponseController;
 import vn.vnpt.common.model.SortPageIn;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1/shopping/product")
+@RequestMapping("/product")
 @RestController
 @Slf4j
 public class ProductController extends AbstractResponseController {
@@ -76,6 +76,16 @@ public class ProductController extends AbstractResponseController {
         return responseEntityDeferredResult(() -> {
             log.info("[REQUEST]: path: /v1/product/dynamic-filter");
             var rs = productService.dynamicFilter(productFilterIn, sortPageIn);
+            log.info("[RESPONSE]: res: Success!");
+            return rs;
+        });
+    }
+
+    @GetMapping(value = "/recommend", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> recommend(@RequestParam String categoryId) {
+        return responseEntityDeferredResult(() -> {
+            log.info("[REQUEST]: path: /v1/product/recommend");
+            var rs = productService.recommend(categoryId);
             log.info("[RESPONSE]: res: Success!");
             return rs;
         });

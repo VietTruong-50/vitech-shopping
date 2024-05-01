@@ -10,6 +10,8 @@ public interface CartService {
 
     CartDetailOut getCartDetail(String sessionToken);
 
+    void loadSessionCartIntoUserCart(String userId, String sessionToken);
+
     AddUpdateItemIn get(String productId, String sessionToken);
 
     void update(String productId, String sessionToken, Integer quantity);

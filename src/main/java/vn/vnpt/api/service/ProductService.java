@@ -23,4 +23,6 @@ public interface ProductService {
     PagingOut<ProductListOut>  listAll(SortPageIn sortPageIn);
 
     Map<String, List<ProductAttributeOut>> listProductAttribute(String productId);
+
+    Object recommend(String categoryId);
 }
