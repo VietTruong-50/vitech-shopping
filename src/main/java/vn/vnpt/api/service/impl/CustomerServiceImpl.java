@@ -46,7 +46,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public JwtAuthenticationResponse signup(SignUpRequest request) {
         var user = User.builder().username(request.getUsername()).firstName(request.getFirstName()).lastName(request.getLastName())
-                .email(request.getEmail()).password(passwordEncoder.encode(request.getPassword()))
+                .email(request.getEmail()).password(passwordEncoder.encode(request.getPassword())).phone(request.getPhone()).fullName(request.getFullName())
                 .build();
         userRepository.saveUser(user);
         var jwt = jwtService.generateToken(user);

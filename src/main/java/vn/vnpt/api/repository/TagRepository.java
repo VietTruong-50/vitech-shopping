@@ -18,10 +18,10 @@ import java.util.Map;
 public class TagRepository {
     private final ProcedureCallerV3 procedureCallerV3;
 
-    public List<TagListOut> listAllByCategory(SortPageIn sortPageIn) {
+    public List<TagListOut> listAllByCategory(String categoryId) {
         Map<String, Object> outputs = procedureCallerV3.callOneRefCursor("tag_list",
                 List.of(
-                        ProcedureParameter.inputParam("prs_key_search", String.class, sortPageIn.getKeySearch()),
+                        ProcedureParameter.inputParam("prs_category_id", String.class, categoryId),
                         ProcedureParameter.outputParam("out_total", Long.class),
                         ProcedureParameter.outputParam("out_result", String.class),
                         ProcedureParameter.refCursorParam("out_cur")

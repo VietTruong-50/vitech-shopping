@@ -15,4 +15,6 @@ public class ProductAttributeOut {
     private String dataType;
     @Col("value")
     private String value;
+    @Col("price_add")
+    private Long priceAdd;
 }
