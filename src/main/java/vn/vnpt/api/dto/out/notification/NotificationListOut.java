@@ -1,7 +1,7 @@
 package vn.vnpt.api.dto.out.notification;
 
 import lombok.Data;
-import vn.vnpt.api.dto.Enum.OrderStatusEnum;
+import vn.vnpt.api.dto.enums.OrderStatusEnum;
 
 @Data
 public class NotificationListOut {

@@ -1,7 +1,7 @@
 package vn.vnpt.api.dto.out.customter;
 
 import lombok.Data;
-import vn.vnpt.api.dto.Enum.GenderEnum;
+import vn.vnpt.api.dto.enums.GenderEnum;
 
 @Data
 public class UpdateProfileIn {

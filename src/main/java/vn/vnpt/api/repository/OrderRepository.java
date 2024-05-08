@@ -2,7 +2,7 @@ package vn.vnpt.api.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import vn.vnpt.api.dto.Enum.OrderStatusEnum;
+import vn.vnpt.api.dto.enums.OrderStatusEnum;
 import vn.vnpt.api.dto.out.order.OrderDetailOut;
 import vn.vnpt.api.dto.out.order.OrderInformationOut;
 import vn.vnpt.api.dto.out.order.OrderListOut;

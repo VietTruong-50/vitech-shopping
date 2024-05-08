@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
-import vn.vnpt.api.dto.Enum.OrderStatusEnum;
+import vn.vnpt.api.dto.enums.OrderStatusEnum;
 import vn.vnpt.api.service.OrderService;
 import vn.vnpt.common.AbstractResponseController;
 import vn.vnpt.common.model.SortPageIn;

@@ -1,4 +1,4 @@
-package vn.vnpt.api.dto.Enum;
+package vn.vnpt.api.dto.enums;
 
 import lombok.Getter;
 

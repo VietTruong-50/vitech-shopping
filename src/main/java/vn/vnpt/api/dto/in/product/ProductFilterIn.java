@@ -1,7 +1,7 @@
 package vn.vnpt.api.dto.in.product;
 
 import lombok.Data;
-import vn.vnpt.api.dto.Enum.ProductStatusEnum;
+import vn.vnpt.api.dto.enums.ProductStatusEnum;
 
 import java.util.List;
 

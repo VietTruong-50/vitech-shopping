@@ -1,4 +1,4 @@
-package vn.vnpt.api.dto.Enum;
+package vn.vnpt.api.dto.enums;
 
 public enum OrderStatusEnum {
     // Tất cả đơn hàng
