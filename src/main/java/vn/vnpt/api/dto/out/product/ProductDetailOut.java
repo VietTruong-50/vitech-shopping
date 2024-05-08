@@ -25,8 +25,12 @@ public class ProductDetailOut {
     private String featureImageLink;
     @Col("subcategory_name")
     private String subCategoryName;
+    @Col("subcategory_id")
+    private String subCategoryId;
     @Col("category_name")
     private String categoryName;
+    @Col("category_id")
+    private String categoryId;
     @Col("parameters")
     private String parametersJson;
     @Col("status")

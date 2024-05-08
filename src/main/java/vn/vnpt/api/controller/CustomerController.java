@@ -12,6 +12,7 @@ import vn.vnpt.api.dto.in.auth.SigninRequest;
 import vn.vnpt.api.dto.in.review.CreateReviewIn;
 import vn.vnpt.api.dto.out.customter.UpdateProfileIn;
 import vn.vnpt.api.service.CustomerService;
+import vn.vnpt.api.service.NotificationService;
 import vn.vnpt.common.AbstractResponseController;
 import vn.vnpt.common.model.SortPageIn;
 
@@ -24,6 +25,7 @@ import java.util.Collections;
 public class CustomerController extends AbstractResponseController {
 
     private final CustomerService customerService;
+    private final NotificationService notificationService;
 
     @PostMapping(value = "/auth/login", produces = "application/json")
     public DeferredResult<ResponseEntity<?>> login(@RequestBody SigninRequest signinRequest){
@@ -155,4 +157,13 @@ public class CustomerController extends AbstractResponseController {
         });
     }
 
+    @GetMapping(value = "/notification/list", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> getAllNotification() {
+        return responseEntityDeferredResult(() -> {
+            log.info("[REQUEST]: path: /v1/customer/notification/list");
+            var rs = notificationService.listAllNotification();
+            log.info("[RESPONSE]: res: Success!");
+            return rs;
+        });
+    }
 }

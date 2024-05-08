@@ -24,5 +24,5 @@ public interface ProductService {
 
     Map<String, List<ProductAttributeOut>> listProductAttribute(String productId);
 
-    Object recommend(String categoryId);
+    Object recommend(String subcategoryId, String categoryId, String productId);
 }

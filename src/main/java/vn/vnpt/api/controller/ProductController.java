@@ -82,10 +82,10 @@ public class ProductController extends AbstractResponseController {
     }
 
     @GetMapping(value = "/recommend", produces = "application/json")
-    public DeferredResult<ResponseEntity<?>> recommend(@RequestParam String categoryId) {
+    public DeferredResult<ResponseEntity<?>> recommend(@RequestParam String productId, @RequestParam String subcategoryId, @RequestParam String categoryId) {
         return responseEntityDeferredResult(() -> {
             log.info("[REQUEST]: path: /v1/product/recommend");
-            var rs = productService.recommend(categoryId);
+            var rs = productService.recommend(subcategoryId, categoryId, productId);
             log.info("[RESPONSE]: res: Success!");
             return rs;
         });

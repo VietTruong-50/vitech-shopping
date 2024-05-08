@@ -6,12 +6,16 @@ import vn.vnpt.api.dto.in.product.ProductFilterIn;
 import vn.vnpt.api.dto.out.product.ProductAttributeOut;
 import vn.vnpt.api.dto.out.product.ProductDetailOut;
 import vn.vnpt.api.dto.out.product.ProductListOut;
+import vn.vnpt.api.dto.out.recommend.RecommendProducts;
 import vn.vnpt.api.repository.helper.ProcedureCallerV3;
 import vn.vnpt.api.repository.helper.ProcedureParameter;
 import vn.vnpt.common.exception.NotFoundException;
 import vn.vnpt.common.model.PagingOut;
 import vn.vnpt.common.model.SortPageIn;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +92,7 @@ public class ProductRepository {
     public PagingOut<ProductListOut> getAllProductBySubCategory(String subCategoryId, SortPageIn sortPageIn) {
         Map<String, Object> outputs = procedureCallerV3.callOneRefCursor("product_subcategory_list",
                 List.of(
-                        ProcedureParameter.inputParam("prs_sub_category_id", String.class, subCategoryId),
+                        ProcedureParameter.inputParam("prs_subcategory_id", String.class, subCategoryId),
                         ProcedureParameter.outputParam("out_total", Long.class),
                         ProcedureParameter.outputParam("out_result", String.class),
                         ProcedureParameter.refCursorParam("out_cur")
@@ -122,5 +126,26 @@ public class ProductRepository {
         List<ProductListOut> outList = (List<ProductListOut>) outputs.get("out_cur");
 
         return PagingOut.of((Number) outputs.get("out_total"), sortPageIn, outList);
+    }
+
+    public List<RecommendProducts> getTopSellerProducts(int limit) {
+        // Get the start date of the current month
+        LocalDate startDate = LocalDate.now().withDayOfMonth(1);
+
+        // Get the end date of the current month
+        LocalDate endDate = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+
+        // Format dates as strings
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String startDateStr = startDate.format(formatter);
+        String endDateStr = endDate.format(formatter);
+
+        var outputs = procedureCallerV3.callOneRefCursor("get_top_selling_products", List.of(
+                ProcedureParameter.inputParam("prs_create_date_from", String.class, startDateStr),
+                ProcedureParameter.inputParam("prs_create_date_to", String.class, endDateStr),
+                ProcedureParameter.inputParam("prs_limit", Integer.class, limit),
+                ProcedureParameter.refCursorParam("out_cur")
+        ), RecommendProducts.class);
+        return (List<RecommendProducts>) outputs.get("out_cur");
     }
 }

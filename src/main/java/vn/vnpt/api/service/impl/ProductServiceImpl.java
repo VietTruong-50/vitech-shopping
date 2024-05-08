@@ -9,10 +9,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.vnpt.api.dto.in.product.ProductFilterIn;
+import vn.vnpt.api.dto.mapper.ProductMapper;
+import vn.vnpt.api.dto.out.customter.CustomerListOut;
 import vn.vnpt.api.dto.out.product.ProductAttributeOut;
 import vn.vnpt.api.dto.out.product.ProductDetailOut;
 import vn.vnpt.api.dto.out.product.ProductListOut;
 import vn.vnpt.api.dto.out.recommend.ClickData;
+import vn.vnpt.api.dto.out.recommend.RecommendProducts;
 import vn.vnpt.api.model.User;
 import vn.vnpt.api.model.UserActivity;
 import vn.vnpt.api.repository.CustomerRepository;
@@ -35,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
     private final KafkaProducerService kafkaProducerService;
+    private final ProductMapper productMapper;
     private final ObjectMapper objectMapper;
     private final Gson gson;
 
@@ -109,50 +113,59 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Object recommend(String categoryId) {
-        var productData = productRepository.getAllProductByCategory(categoryId, new SortPageIn()).getData();
+    public Object recommend(String subcategoryId, String categoryId, String productId) {
+        // Lấy danh sách sản phẩm theo subcategory và category
+        List<ProductListOut> prdsBySubcategory = productRepository.getAllProductBySubCategory(subcategoryId, new SortPageIn()).getData();
+        List<ProductListOut> prdsByCategory = productRepository.getAllProductByCategory(categoryId, new SortPageIn()).getData();
 
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        Authentication authentication = securityContext.getAuthentication();
-        Optional<User> user = userRepository.findByEmail(authentication.getName());
+        // Loại bỏ sản phẩm có productId khỏi danh sách
+        prdsByCategory.removeIf(it -> Objects.equals(it.getProductId(), productId));
+        prdsBySubcategory.removeIf(it -> Objects.equals(it.getProductId(), productId));
 
-        if (user.isPresent()) {
-            var customerData = customerRepository.findAllCustomers(new SortPageIn()).getData();
+        // Kết hợp danh sách sản phẩm từ subcategory và category thành một Set
+        Set<ProductListOut> combinedSet = new HashSet<>(prdsBySubcategory);
+        combinedSet.addAll(prdsByCategory);
 
-            Map<String, Map<String, Double>> viewData = new HashMap<>();
+        // Lấy thông tin người dùng hiện tại
+        Optional<User> user = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .map(Authentication::getName)
+                .flatMap(userRepository::findByEmail);
 
-            for (var cus : customerData) {
-                Map<String, Double> map = buildClickProductMap(cus.getId());
-                viewData.put(cus.getId(), map);
-            }
+        // Lấy danh sách top seller
+        var topSeller = productRepository.getTopSellerProducts(5);
 
+        Map<String, Object> result = new HashMap<>();
+        result.put("topSellers", topSeller);
+        result.put("prdsBySubcategory", productMapper.toRecommendProducts(prdsBySubcategory));
+        result.put("prdsByCategory", productMapper.toRecommendProducts(prdsByCategory));
+
+        // Nếu người dùng hiện tại tồn tại
+        user.ifPresent(u -> {
+            // Lấy dữ liệu của khách hàng
+            Map<String, Map<String, Double>> viewData = customerRepository.findAllCustomers(new SortPageIn()).getData().stream()
+                    .collect(Collectors.toMap(CustomerListOut::getId, cus -> buildClickProductMap(cus.getId())));
+
+            // Tạo một đối tượng CollaborativeFiltering và lấy ra các sản phẩm được đề xuất cho người dùng
             CollaborativeFiltering cf = new CollaborativeFiltering(viewData, null);
+            Map<String, Double> recommendations = cf.getUserRecommendations(u.getId());
 
-            var recommendations = cf.getUserRecommendations(user.get().getId());
-
-            var list = recommendations.entrySet().stream()
+            // Lấy ra top 5 sản phẩm được đề xuất
+            List<ProductListOut> matchedProducts = recommendations.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .limit(5)
-                    .toList();
-
-            List<ProductListOut> matchedProducts = new ArrayList<>();
-
-            for (Map.Entry<String, Double> entry : list) {
-                String productId = entry.getKey();
-                Optional<ProductListOut> matchingProduct = productData.stream()
-                        .filter(product -> product.getProductId().equals(productId))
-                        .findFirst();
-                matchingProduct.ifPresent(matchedProducts::add);
-            }
-
-            return matchedProducts;
-        } else {
-            // If user is not authenticated, return list of products from the same category with limit 5
-            return productData.stream()
-                    .limit(5)
+                    .map(Map.Entry::getKey)
+                    .flatMap(id -> combinedSet.stream().filter(product -> product.getProductId().equals(id)))
                     .collect(Collectors.toList());
-        }
+
+            // Nếu có sản phẩm được đề xuất, thêm vào kết quả
+            if (!matchedProducts.isEmpty()) {
+                result.put("recommends", productMapper.toRecommendProducts(matchedProducts));
+            }
+        });
+
+        return result;
     }
+
 
     private Map<String, Double> buildClickProductMap(String userId) {
         Map<String, Double> map = new HashMap<>();
