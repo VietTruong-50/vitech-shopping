@@ -14,10 +14,13 @@ import vn.vnpt.common.constant.ConstantString;
 import vn.vnpt.common.errorcode.ErrorCode;
 import vn.vnpt.common.exception.IllegalArgumentException;
 import vn.vnpt.common.exception.*;
+import vn.vnpt.common.exception.model.ApiError;
 import vn.vnpt.common.response.ResponseEntities;
 
+import java.time.Instant;
+
 @Slf4j
-public abstract class AbstractResponseController {
+public abstract class AbstractResponseController<T> {
 
 	@Autowired
 	private KafkaProducerService kafkaProducerService;
@@ -25,7 +28,7 @@ public abstract class AbstractResponseController {
 	protected AbstractResponseController() {
 	}
 
-	public DeferredResult<ResponseEntity<?>> responseEntityDeferredResult(CallbackFunction<?> callbackFunction) {
+	public DeferredResult<ResponseEntity<?>> responseEntityDeferredResult(CallbackFunction<T> callbackFunction) {
 		Gson gson = new Gson();
 		DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>(ConstantString.TIMEOUT_NONBLOCK);
 		deferredResult.onTimeout(() -> deferredResult.setErrorResult(
@@ -33,40 +36,38 @@ public abstract class AbstractResponseController {
 		try {
 			deferredResult.setResult(ResponseEntities.createSuccessResponse(HttpStatus.OK, callbackFunction.execute()));
 		} catch (NotFoundException ex) {
-			log.warn(ex.getMessage());
-			deferredResult.setResult(ResponseEntities.createErrorResponse(HttpStatus.NOT_FOUND,
-					ex.getErrorCode(), ex.getMessage().trim()));
-			kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
-					.build()));
-		} catch (AuthenticationException  | IllegalArgumentException ex) {
-			deferredResult.setResult(ResponseEntities.createErrorResponse(HttpStatus.BAD_REQUEST,
-					ErrorCode.IDG_00000401, "Tài khoản hoặc mật khẩu không chính xác"));
-			kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
-					.build()));
+			handleException(ex, HttpStatus.NOT_FOUND, ex.getErrorCode(), ex.getMessage(), gson, deferredResult);
+		} catch (AuthenticationException | IllegalArgumentException ex) {
+			handleException(ex, HttpStatus.BAD_REQUEST, ErrorCode.IDG_00000401, "Tài khoản hoặc mật khẩu không chính xác", gson, deferredResult);
 		} catch (AccessDeniedException ex) {
-			log.warn(ex.getMessage());
-			deferredResult.setResult(ResponseEntities.createErrorResponse(HttpStatus.NOT_ACCEPTABLE,
-					ErrorCode.IDG_00000406, Common.subString(ex.getMessage().trim())));
-			kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
-					.build()));
+			handleException(ex, HttpStatus.NOT_ACCEPTABLE, ErrorCode.IDG_00000406, ex.getMessage().trim(), gson, deferredResult);
 		} catch (ApiErrorException ex) {
-			deferredResult.setResult(ResponseEntities.createErrorResponse(ex.getApiError()));
-			kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
-					.build()));
+			handleException(ex, HttpStatus.INTERNAL_SERVER_ERROR, ex.getApiError().getError(), gson, deferredResult);
 		} catch (BadRequestException ex) {
-			deferredResult.setResult(ResponseEntities.createErrorResponse(HttpStatus.BAD_REQUEST,
-					ex.getErrorCode(), Common.subString(ex.getMessage().trim())));
-			kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
-					.build()));
+			handleException(ex, HttpStatus.BAD_REQUEST, ex.getErrorCode(), ex.getMessage().trim(), gson, deferredResult);
 		} catch (RuntimeException ex) {
-			log.error(ex.getMessage(), ex);
-			deferredResult.setResult(ResponseEntities.createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-					ErrorCode.IDG_00000500, Common.subString(ex.getMessage().trim())));
-			kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
-					.build()));
+			handleException(ex, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.IDG_00000500, ex.getMessage().trim(), gson, deferredResult);
 		}
 		return deferredResult;
 	}
 
+	private void handleException(Exception ex, HttpStatus httpStatus, String errorCode, String message, Gson gson, DeferredResult<ResponseEntity<?>> deferredResult) {
+		log.error(ex.getMessage(), ex);
+		deferredResult.setResult(ResponseEntities.createErrorResponse(httpStatus, errorCode, Common.subString(message)));
+		kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
+				.errorType("GenericError")
+				.errorDetail(ex.getMessage())
+				.timestamp(Instant.now().toString())
+				.build()));
+	}
 
+	private void handleException(Exception ex, HttpStatus httpStatus, String apiError, Gson gson, DeferredResult<ResponseEntity<?>> deferredResult) {
+		log.error(ex.getMessage(), ex);
+		deferredResult.setResult(ResponseEntities.createErrorResponse(httpStatus, apiError));
+		kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
+				.errorType("GenericError")
+				.errorDetail(ex.getMessage())
+				.timestamp(Instant.now().toString())
+				.build()));
+	}
 }
