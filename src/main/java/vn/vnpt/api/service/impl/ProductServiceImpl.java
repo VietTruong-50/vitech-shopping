@@ -16,6 +16,7 @@ import vn.vnpt.api.dto.out.product.ProductDetailOut;
 import vn.vnpt.api.dto.out.product.ProductListOut;
 import vn.vnpt.api.dto.out.recommend.ClickData;
 import vn.vnpt.api.dto.out.recommend.RecommendProducts;
+import vn.vnpt.api.model.ErrorLog;
 import vn.vnpt.api.model.User;
 import vn.vnpt.api.model.UserActivity;
 import vn.vnpt.api.repository.CustomerRepository;
@@ -27,6 +28,8 @@ import vn.vnpt.api.service.helper.KafkaProducerService;
 import vn.vnpt.common.model.PagingOut;
 import vn.vnpt.common.model.SortPageIn;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
