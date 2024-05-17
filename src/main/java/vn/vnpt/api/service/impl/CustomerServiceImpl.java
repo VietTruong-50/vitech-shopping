@@ -51,11 +51,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public JwtAuthenticationResponse signup(SignUpRequest request) {
         // Generate verification token
-        String token = UUID.randomUUID().toString();
-
-        // Send verification email
-        String verificationUrl = "http://localhost:9000/verify?token=" + token;
-        emailService.sendEmail(request.getEmail(), "Verify account",  "Click the link to verify your account: " + verificationUrl);
+//        String token = UUID.randomUUID().toString();
+//        // Send verification email
+//        String verificationUrl = "http://localhost:9000/verify?token=" + token;
+//        emailService.sendEmail(request.getEmail(), "Verify account",  "Click the link to verify your account: " + verificationUrl);
 
         var user = User.builder().username(request.getUsername()).firstName(request.getFirstName()).lastName(request.getLastName())
                 .email(request.getEmail()).password(passwordEncoder.encode(request.getPassword())).phone(request.getPhone()).fullName(request.getFullName())
