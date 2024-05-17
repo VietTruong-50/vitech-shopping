@@ -15,6 +15,7 @@ import vn.vnpt.api.dto.in.auth.SigninRequest;
 import vn.vnpt.api.dto.in.review.CreateReviewIn;
 import vn.vnpt.api.dto.out.address.AddressDetailOut;
 import vn.vnpt.api.dto.out.address.AddressListOut;
+import vn.vnpt.api.dto.out.auth.ChangePasswordDtoIn;
 import vn.vnpt.api.dto.out.auth.JwtAuthenticationResponse;
 import vn.vnpt.api.dto.out.review.ReviewListOut;
 import vn.vnpt.api.dto.out.customter.ProfileDetailOut;
@@ -24,12 +25,15 @@ import vn.vnpt.api.repository.CustomerRepository;
 import vn.vnpt.api.repository.UserRepository;
 import vn.vnpt.api.service.CartService;
 import vn.vnpt.api.service.CustomerService;
+import vn.vnpt.api.service.EmailService;
 import vn.vnpt.authentication.jwt.JwtService;
+import vn.vnpt.common.exception.BadRequestException;
 import vn.vnpt.common.model.PagingOut;
 import vn.vnpt.common.model.SortPageIn;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -42,9 +46,17 @@ public class CustomerServiceImpl implements CustomerService {
     private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
     private final CartService cartService;
-
+    private final EmailService emailService;
+    
     @Override
     public JwtAuthenticationResponse signup(SignUpRequest request) {
+        // Generate verification token
+        String token = UUID.randomUUID().toString();
+
+        // Send verification email
+        String verificationUrl = "http://localhost:9000/verify?token=" + token;
+        emailService.sendEmail(request.getEmail(), "Verify account",  "Click the link to verify your account: " + verificationUrl);
+
         var user = User.builder().username(request.getUsername()).firstName(request.getFirstName()).lastName(request.getLastName())
                 .email(request.getEmail()).password(passwordEncoder.encode(request.getPassword())).phone(request.getPhone()).fullName(request.getFullName())
                 .build();
@@ -153,5 +165,18 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public PagingOut<ReviewListOut> getProductComments(String productId, SortPageIn sortPageIn) {
         return customerRepository.getProductReviews(productId, sortPageIn);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordDtoIn changePasswordDtoIn) {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        Optional<User> user = userRepository.findByEmail(authentication.getName());
+
+        if(passwordEncoder.matches(user.get().getPassword() ,changePasswordDtoIn.getOldPassword())){
+                userRepository.changePassword(user.get().getId(), passwordEncoder.encode(changePasswordDtoIn.getNewPassword()));
+        }else {
+            throw new BadRequestException("Mật khẩu cũ không trùng khớp");
+        }
     }
 }

@@ -14,7 +14,11 @@ public class CollaborativeFiltering {
         this.itemRatings = itemRatings;
     }
 
-    private double getUserSimilarity(String user1, String user2) {
+    private double calculateAverageRating(Map<String, Double> ratings) {
+        return ratings.values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+    }
+
+    public double getUserSimilarity(String user1, String user2) {
         Set<String> commonItems = new HashSet<>(userRatings.get(user1).keySet());
         commonItems.retainAll(userRatings.get(user2).keySet());
 
@@ -22,14 +26,29 @@ public class CollaborativeFiltering {
             return 0.0; // No common items, similarity is zero
         }
 
+        double avgUser1 = calculateAverageRating(userRatings.get(user1));
+        double avgUser2 = calculateAverageRating(userRatings.get(user2));
+
+        double sumSqrt1 = 0.0;
+        double sumSqrt2 = 0.0;
         double sumSquaredDiff = 0.0;
+
         for (String item : commonItems) {
             double rating1 = userRatings.get(user1).get(item);
             double rating2 = userRatings.get(user2).get(item);
-            sumSquaredDiff += Math.pow(rating1 - rating2, 2);
+            double v1 = rating1 - avgUser1;
+            double v2 = rating2 - avgUser2;
+
+            sumSquaredDiff += v1 * v2;
+            sumSqrt1 += Math.pow(v1, 2);
+            sumSqrt2 += Math.pow(v2, 2);
         }
 
-        return 1 / (1 + Math.sqrt(sumSquaredDiff));
+        if (sumSqrt1 == 0 || sumSqrt2 == 0) {
+            return 0.0; // Avoid division by zero
+        }
+
+        return sumSquaredDiff / (Math.sqrt(sumSqrt1) * Math.sqrt(sumSqrt2));
     }
 
     public Map<String, Double> getUserRecommendations(String targetUser) {

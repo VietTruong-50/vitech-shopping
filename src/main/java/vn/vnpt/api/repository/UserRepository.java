@@ -47,4 +47,16 @@ public class UserRepository {
 
         return !Common.isNullOrEmpty(outList) ? Optional.of(outList.get(0)) : Optional.empty();
     }
+
+    public void changePassword(String id, String encode) {
+        Map<String, Object> outputs = procedureCallerV3.callNoRefCursor("change_password",
+                List.of(
+                        ProcedureParameter.inputParam("prs_user_id", String.class, id),
+                        ProcedureParameter.inputParam("prs_new_password", String.class, encode),
+                        ProcedureParameter.outputParam("out_result", String.class)
+                )
+        );
+        String result = (String) outputs.get("out_result");
+        if (!DatabaseStatus.Success.equals(result)) throw new RuntimeException("change_password failed!");
+    }
 }

@@ -12,9 +12,10 @@ import vn.vnpt.api.model.ErrorLog;
 import vn.vnpt.api.service.helper.KafkaProducerService;
 import vn.vnpt.common.constant.ConstantString;
 import vn.vnpt.common.errorcode.ErrorCode;
+import vn.vnpt.common.exception.ApiErrorException;
+import vn.vnpt.common.exception.BadRequestException;
 import vn.vnpt.common.exception.IllegalArgumentException;
-import vn.vnpt.common.exception.*;
-import vn.vnpt.common.exception.model.ApiError;
+import vn.vnpt.common.exception.NotFoundException;
 import vn.vnpt.common.response.ResponseEntities;
 
 import java.time.Instant;

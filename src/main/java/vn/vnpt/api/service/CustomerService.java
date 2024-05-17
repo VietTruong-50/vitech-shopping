@@ -6,6 +6,7 @@ import vn.vnpt.api.dto.in.auth.SigninRequest;
 import vn.vnpt.api.dto.in.review.CreateReviewIn;
 import vn.vnpt.api.dto.out.address.AddressDetailOut;
 import vn.vnpt.api.dto.out.address.AddressListOut;
+import vn.vnpt.api.dto.out.auth.ChangePasswordDtoIn;
 import vn.vnpt.api.dto.out.auth.JwtAuthenticationResponse;
 import vn.vnpt.api.dto.out.review.ReviewListOut;
 import vn.vnpt.api.dto.out.customter.ProfileDetailOut;
@@ -41,4 +42,6 @@ public interface CustomerService {
     void deleteComment(String commentId);
 
     PagingOut<ReviewListOut> getProductComments(String productId, SortPageIn sortPageIn);
+
+    void changePassword(ChangePasswordDtoIn changePasswordDtoIn);
 }

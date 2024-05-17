@@ -47,11 +47,11 @@ eureka: #<1>
       enabled: true
 
 ---
-eureka:
-  instance:
-    ip-address: ${CLIENT_IP_ADDRESS:localhost}
-    prefer-ip-address: ${PREFER_IP_ADDRESS:false}
-    hostname: ${HOSTNAME:shopping-service}
+#eureka:
+#  instance:
+#    ip-address: ${CLIENT_IP_ADDRESS:localhost}
+#    prefer-ip-address: ${PREFER_IP_ADDRESS:false}
+#    hostname: ${HOSTNAME:localhost}
 
 ---
 spring:

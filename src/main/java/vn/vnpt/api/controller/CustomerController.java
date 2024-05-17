@@ -10,6 +10,7 @@ import vn.vnpt.api.dto.in.address.CreateUpdateAddressIn;
 import vn.vnpt.api.dto.in.auth.SignUpRequest;
 import vn.vnpt.api.dto.in.auth.SigninRequest;
 import vn.vnpt.api.dto.in.review.CreateReviewIn;
+import vn.vnpt.api.dto.out.auth.ChangePasswordDtoIn;
 import vn.vnpt.api.dto.out.customter.UpdateProfileIn;
 import vn.vnpt.api.service.CustomerService;
 import vn.vnpt.api.service.NotificationService;
@@ -44,6 +45,17 @@ public class CustomerController extends AbstractResponseController {
             var rs = customerService.signup(signUpRequest);
             log.info("[RESPONSE]: res: Success!");
             return rs;
+        });
+    }
+
+
+    @PostMapping(value = "/auth/change-password", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> changePassword(@RequestBody ChangePasswordDtoIn changePasswordDtoIn){
+        return responseEntityDeferredResult(() -> {
+            log.info("[REQUEST]: path: /v1/customer/auth/register");
+            customerService.changePassword(changePasswordDtoIn);
+            log.info("[RESPONSE]: res: Success!");
+            return Collections.emptyMap();
         });
     }
 
