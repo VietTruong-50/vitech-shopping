@@ -3,12 +3,17 @@ package vn.vnpt.api.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import vn.vnpt.api.dto.enums.OrderStatusEnum;
+import vn.vnpt.api.dto.in.order.UpdateOrderStatus;
 import vn.vnpt.api.dto.out.order.OrderDetailOut;
 import vn.vnpt.api.dto.out.order.OrderInformationOut;
 import vn.vnpt.api.dto.out.order.OrderListOut;
 import vn.vnpt.api.repository.helper.ProcedureCallerV3;
 import vn.vnpt.api.repository.helper.ProcedureParameter;
+import vn.vnpt.common.Common;
+import vn.vnpt.common.constant.DatabaseStatus;
+import vn.vnpt.common.exception.ApiErrorException;
 import vn.vnpt.common.exception.NotFoundException;
+import vn.vnpt.common.exception.model.ApiError;
 import vn.vnpt.common.model.PagingOut;
 import vn.vnpt.common.model.SortPageIn;
 
@@ -23,10 +28,11 @@ public class OrderRepository {
     private final ProcedureCallerV3 procedureCallerV3;
 
 
-    public PagingOut<OrderListOut> getCurrentOrders(OrderStatusEnum status, SortPageIn sortPageIn) {
+    public PagingOut<OrderListOut> getCurrentOrders(OrderStatusEnum status, String userId, SortPageIn sortPageIn) {
         Map<String, Object> outputs = procedureCallerV3.callOneRefCursor("order_list_filter",
                 List.of(
                         ProcedureParameter.inputParam("prs_status", String.class, status),
+                        ProcedureParameter.inputParam("prs_customer_id", String.class, userId),
                         ProcedureParameter.inputParam("prs_properties_sort", String.class, sortPageIn.getPropertiesSort()),
                         ProcedureParameter.inputParam("prs_sort", String.class, sortPageIn.getSort()),
                         ProcedureParameter.inputParam("prn_page_index", Integer.class, sortPageIn.getPage()),
@@ -76,5 +82,23 @@ public class OrderRepository {
             throw new NotFoundException("call order_detail_list failed!");
         }
         return outList;
+    }
+
+    public void updateOrderStatus(UpdateOrderStatus updateOrderStatus) {
+        Boolean confirmRefund = null;
+
+        if (updateOrderStatus.getOrderStatusEnum().equals(OrderStatusEnum.REFUND)) {
+            confirmRefund = false;
+        }
+
+        var outputs = procedureCallerV3.callNoRefCursor("order_update_status", List.of(
+                ProcedureParameter.inputParam("prs_order_id", String.class, updateOrderStatus.getOrderId()),
+                ProcedureParameter.inputParam("prs_status", Integer.class, updateOrderStatus.getOrderStatusEnum().value),
+                ProcedureParameter.inputParam("prs_confirm_refund", Boolean.class, confirmRefund),
+                ProcedureParameter.outputParam("out_result", String.class))
+        );
+        String result = (String) outputs.get("out_result");
+        if (DatabaseStatus.isExist(result)) throw new ApiErrorException(ApiError.fieldExist(result));
+        if (!DatabaseStatus.Success.equals(result)) throw new RuntimeException("order_update_status failed!");
     }
 }

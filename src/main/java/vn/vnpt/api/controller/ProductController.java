@@ -90,4 +90,15 @@ public class ProductController extends AbstractResponseController {
             return rs;
         });
     }
+
+    @GetMapping(value = "/top-seller", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> getTopSeller() {
+        return responseEntityDeferredResult(() -> {
+            log.info("[REQUEST]: path: /v1/product/top-seller");
+            var rs = productService.getTopSeller();
+            log.info("[RESPONSE]: res: Success!");
+            return rs;
+        });
+    }
+
 }

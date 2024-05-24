@@ -1,6 +1,7 @@
 package vn.vnpt.api.service;
 
 import vn.vnpt.api.dto.enums.OrderStatusEnum;
+import vn.vnpt.api.dto.in.order.UpdateOrderStatus;
 import vn.vnpt.api.dto.out.order.OrderInformationOut;
 import vn.vnpt.api.dto.out.order.OrderListOut;
 import vn.vnpt.common.model.PagingOut;
@@ -11,4 +12,5 @@ public interface OrderService {
 
     OrderInformationOut getOrderDetail(String orderCode);
 
+    void updateOrderStatus(UpdateOrderStatus updateOrderStatus);
 }

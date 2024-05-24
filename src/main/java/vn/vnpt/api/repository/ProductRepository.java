@@ -9,6 +9,7 @@ import vn.vnpt.api.dto.out.product.ProductListOut;
 import vn.vnpt.api.dto.out.recommend.RecommendProducts;
 import vn.vnpt.api.repository.helper.ProcedureCallerV3;
 import vn.vnpt.api.repository.helper.ProcedureParameter;
+import vn.vnpt.common.Common;
 import vn.vnpt.common.exception.NotFoundException;
 import vn.vnpt.common.model.PagingOut;
 import vn.vnpt.common.model.SortPageIn;
@@ -111,7 +112,7 @@ public class ProductRepository {
                         ProcedureParameter.inputParam("prs_tag_ids", String.class, productFilterIn.getTagsList()),
                         ProcedureParameter.inputParam("prs_min_price", Long.class, productFilterIn.getMinPrice()),
                         ProcedureParameter.inputParam("prs_max_price", Long.class, productFilterIn.getMaxPrice()),
-                        ProcedureParameter.inputParam("prs_status", Integer.class, productFilterIn.getStatusEnum().value),
+                        ProcedureParameter.inputParam("prs_status", Integer.class, !Common.isNullOrEmpty(productFilterIn.getStatusEnum()) ? productFilterIn.getStatusEnum().value : null),
                         ProcedureParameter.inputParam("prs_category_id", String.class, productFilterIn.getCategoryId()),
                         ProcedureParameter.inputParam("prs_properties_sort", String.class, sortPageIn.getPropertiesSort()),
                         ProcedureParameter.inputParam("prs_sort", String.class, sortPageIn.getSort()),
@@ -140,10 +141,11 @@ public class ProductRepository {
         String startDateStr = startDate.format(formatter);
         String endDateStr = endDate.format(formatter);
 
-        var outputs = procedureCallerV3.callOneRefCursor("get_top_selling_products", List.of(
-                ProcedureParameter.inputParam("prs_create_date_from", String.class, startDateStr),
-                ProcedureParameter.inputParam("prs_create_date_to", String.class, endDateStr),
+        var outputs = procedureCallerV3.callOneRefCursor("get_product_reports", List.of(
+                ProcedureParameter.inputParam("prs_create_date_from", String.class, !Common.isNullOrEmpty(startDate) ? startDate.toString() : null),
+                ProcedureParameter.inputParam("prs_create_date_to", String.class, !Common.isNullOrEmpty(endDate) ? endDate.toString() : null),
                 ProcedureParameter.inputParam("prs_limit", Integer.class, limit),
+                ProcedureParameter.inputParam("prs_type", Integer.class, 1),
                 ProcedureParameter.refCursorParam("out_cur")
         ), RecommendProducts.class);
         return (List<RecommendProducts>) outputs.get("out_cur");

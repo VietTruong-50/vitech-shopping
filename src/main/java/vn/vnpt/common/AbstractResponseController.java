@@ -43,7 +43,7 @@ public abstract class AbstractResponseController<T> {
 		} catch (AccessDeniedException ex) {
 			handleException(ex, HttpStatus.NOT_ACCEPTABLE, ErrorCode.IDG_00000406, ex.getMessage().trim(), gson, deferredResult);
 		} catch (ApiErrorException ex) {
-			handleException(ex, HttpStatus.INTERNAL_SERVER_ERROR, ex.getApiError().getError(), gson, deferredResult);
+			handleException(ex, ex.getApiError().getError(), gson, deferredResult);
 		} catch (BadRequestException ex) {
 			handleException(ex, HttpStatus.BAD_REQUEST, ex.getErrorCode(), ex.getMessage().trim(), gson, deferredResult);
 		} catch (RuntimeException ex) {
@@ -62,11 +62,11 @@ public abstract class AbstractResponseController<T> {
 				.build()));
 	}
 
-	private void handleException(Exception ex, HttpStatus httpStatus, String apiError, Gson gson, DeferredResult<ResponseEntity<?>> deferredResult) {
+	private void handleException(Exception ex, String apiError, Gson gson, DeferredResult<ResponseEntity<?>> deferredResult) {
 		log.error(ex.getMessage(), ex);
-		deferredResult.setResult(ResponseEntities.createErrorResponse(httpStatus, apiError));
+		deferredResult.setResult(ResponseEntities.createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, apiError));
 		kafkaProducerService.sendMessage("exception", gson.toJson(ErrorLog.builder()
-				.errorType("GenericError")
+				.errorType("ServerError")
 				.errorDetail(ex.getMessage())
 				.timestamp(Instant.now().toString())
 				.build()));
