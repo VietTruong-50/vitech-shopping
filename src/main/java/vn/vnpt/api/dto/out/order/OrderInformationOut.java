@@ -83,7 +83,7 @@ public class OrderInformationOut {
     private String confirmDate;
 
     @Col("confirm_refund")
-    private String confirmRefund;
+    private Boolean confirmRefund;
 
     private List<OrderDetailOut> orderDetailOuts;
 }
