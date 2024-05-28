@@ -1,0 +1,40 @@
+package vn.hust.api.controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+import vn.hust.api.service.CategoryService;
+import vn.hust.common.AbstractResponseController;
+
+@RequiredArgsConstructor
+@RequestMapping("/category")
+@RestController
+@Slf4j
+public class CategoryController extends AbstractResponseController {
+
+    private final CategoryService categoryService;
+
+    @GetMapping(value = "/list-filter", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> showAllCategory() {
+        return responseEntityDeferredResult(() -> {
+            log.info("[REQUEST]: path: /list-filter");
+            var result = categoryService.listAllCategory();
+            log.info("[RESPONSE]: res: Success!");
+            return result;
+        });
+    }
+
+    @GetMapping(value = "/menu", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> showMenuCategory() {
+        return responseEntityDeferredResult(() -> {
+            log.info("[REQUEST]: path: /menu");
+            var result = categoryService.showMenu();
+            log.info("[RESPONSE]: res: Success!");
+            return result;
+        });
+    }
+}
