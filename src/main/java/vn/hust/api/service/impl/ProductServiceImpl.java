@@ -173,6 +173,16 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.getTopSellerProducts(10);
     }
 
+    @Override
+    public Object getRecentView() {
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        Optional<User> user = userRepository.findByEmail(authentication.getName());
+
+        return productRepository.getRecentView(10, user.get().getId());
+    }
+
 
     private Map<String, Double> buildClickProductMap(String userId) {
         Map<String, Double> map = new HashMap<>();

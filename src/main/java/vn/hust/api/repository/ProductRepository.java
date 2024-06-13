@@ -142,10 +142,19 @@ public class ProductRepository {
         String endDateStr = endDate.format(formatter);
 
         var outputs = procedureCallerV3.callOneRefCursor("get_product_reports", List.of(
-                ProcedureParameter.inputParam("prs_create_date_from", String.class, !Common.isNullOrEmpty(startDate) ? startDate.toString() : null),
-                ProcedureParameter.inputParam("prs_create_date_to", String.class, !Common.isNullOrEmpty(endDate) ? endDate.toString() : null),
+                ProcedureParameter.inputParam("prs_create_date_from", String.class, !Common.isNullOrEmpty(startDate) ? startDateStr : null),
+                ProcedureParameter.inputParam("prs_create_date_to", String.class, !Common.isNullOrEmpty(endDate) ? endDateStr : null),
                 ProcedureParameter.inputParam("prs_limit", Integer.class, limit),
                 ProcedureParameter.inputParam("prs_type", Integer.class, 1),
+                ProcedureParameter.refCursorParam("out_cur")
+        ), RecommendProducts.class);
+        return (List<RecommendProducts>) outputs.get("out_cur");
+    }
+
+    public List<RecommendProducts> getRecentView(int limit, String id) {
+        var outputs = procedureCallerV3.callOneRefCursor("get_recent_view", List.of(
+                ProcedureParameter.inputParam("prs_limit", Integer.class, limit),
+                ProcedureParameter.inputParam("prs_user_id", String.class, id),
                 ProcedureParameter.refCursorParam("out_cur")
         ), RecommendProducts.class);
         return (List<RecommendProducts>) outputs.get("out_cur");

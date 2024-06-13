@@ -9,8 +9,8 @@ import vn.hust.api.dto.out.recommend.RecommendProducts;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-05-28T08:45:20+0700",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 19.0.2 (Amazon.com Inc.)"
+    date = "2024-06-04T23:49:45+0700",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.10 (Private Build)"
 )
 @Component
 public class ProductMapperImpl implements ProductMapper {

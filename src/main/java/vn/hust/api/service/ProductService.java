@@ -27,4 +27,6 @@ public interface ProductService {
     Object recommend(String subcategoryId, String categoryId, String productId);
 
     Object getTopSeller();
+
+    Object getRecentView();
 }

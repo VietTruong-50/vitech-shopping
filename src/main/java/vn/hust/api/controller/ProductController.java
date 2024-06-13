@@ -101,4 +101,14 @@ public class ProductController extends AbstractResponseController {
         });
     }
 
+    @GetMapping(value = "/recent-view", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> getRecentView() {
+        return responseEntityDeferredResult(() -> {
+            log.info("[REQUEST]: path: /v1/product/recent-view");
+            var rs = productService.getRecentView();
+            log.info("[RESPONSE]: res: Success!");
+            return rs;
+        });
+    }
+
 }
