@@ -38,7 +38,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderInformationOut getOrderDetail(String orderCode) {
-        var rs = orderRepository.getOrderDetail(orderCode);
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        Optional<User> user = userRepository.findByEmail(authentication.getName());
+
+        var rs = orderRepository.getOrderDetail(orderCode, user.get().getId());
         rs.setOrderDetailOuts(orderRepository.getOrderDetails(orderCode));
 
         return rs;
@@ -46,6 +50,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void updateOrderStatus(UpdateOrderStatus updateOrderStatus) {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        Optional<User> user = userRepository.findByEmail(authentication.getName());
+
         orderRepository.updateOrderStatus(updateOrderStatus);
 
        String messageContent = switch (updateOrderStatus.getOrderStatusEnum()) {
@@ -65,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
                 yield "Trạng thái đơn hàng không xác định";
         };
 
-        var order = orderRepository.getOrderDetail(updateOrderStatus.getOrderId());
+        var order = orderRepository.getOrderDetail(updateOrderStatus.getOrderId(), user.get().getId());
 
         Notification notification = new Notification();
 

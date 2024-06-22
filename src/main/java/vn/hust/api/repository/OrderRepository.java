@@ -50,10 +50,11 @@ public class OrderRepository {
         return PagingOut.of((Number) outputs.get("out_total"), sortPageIn, outList);
     }
 
-    public OrderInformationOut getOrderDetail(String orderCode) {
+    public OrderInformationOut getOrderDetail(String orderCode, String userId) {
         var outputs = procedureCallerV3.callOneRefCursor("order_detail_by_code",
                 List.of(
                         ProcedureParameter.inputParam("prs_order_code", String.class, orderCode),
+                        ProcedureParameter.inputParam("prs_user_id", String.class, userId),
                         ProcedureParameter.outputParam("out_result", String.class),
                         ProcedureParameter.refCursorParam("out_cur")
                 ),

@@ -40,7 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
         for (var it: listNotification){
             NotificationListOut notificationListOut = new NotificationListOut();
 
-            OrderInformationOut orderInfOut = orderRepository.getOrderDetail(it.getOrderCode());
+            OrderInformationOut orderInfOut = orderRepository.getOrderDetail(it.getOrderCode(), user.get().getId());
 
             notificationListOut.setOrderCode(orderInfOut.getOrderCode());
             notificationListOut.setOrderId(orderInfOut.getOrderId());

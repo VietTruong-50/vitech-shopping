@@ -36,8 +36,10 @@ public class CartServiceImpl implements CartService {
     public void addItemToCart(AddUpdateItemIn addUpdateItemIn) {
         String uuidItem;
 
+        //Lấy thông tin giỏ hàng theo session token
         Map<Object, Object> entries = getCartDetail(addUpdateItemIn.getSessionToken()).getCart();
 
+        //Cập nhật số lượng nếu cùng giá trị attribute
         for (Map.Entry<Object, Object> entry : entries.entrySet()) {
             AddUpdateItemIn item = (AddUpdateItemIn) entry.getValue();
             if (Objects.equals(item.getProductId(), addUpdateItemIn.getProductId()) && Objects.equals(item.getAttribute(), addUpdateItemIn.getAttribute())) {
@@ -46,11 +48,13 @@ public class CartServiceImpl implements CartService {
             }
         }
 
+        //Thêm sản phẩm vào giỏ hàng nếu không tồn tại session token
         if (!Common.isNullOrEmpty(addUpdateItemIn.getSessionToken())) {
             hashOperations.put(CART_KEY + ":" + addUpdateItemIn.getSessionToken(), addUpdateItemIn.getProductId(), addUpdateItemIn);
             return;
         }
 
+        //Nếu người dùng đã đăng nhập thì key là uuid
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         Optional<User> user = userRepository.findByEmail(authentication.getName());

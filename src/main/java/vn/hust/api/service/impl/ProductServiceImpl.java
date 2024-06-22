@@ -141,6 +141,7 @@ public class ProductServiceImpl implements ProductService {
         // Nếu người dùng hiện tại tồn tại
         user.ifPresent(u -> {
 //            List<ProductListOut> list = productRepository.dynamicFilter(new ProductFilterIn(), new SortPageIn()).getData();
+
             // Lấy dữ liệu của khách hàng
             Map<String, Map<String, Double>> viewData = customerRepository.findAllCustomers(new SortPageIn()).getData().stream()
                     .collect(Collectors.toMap(CustomerListOut::getId, cus -> buildClickProductMap(cus.getId())));
