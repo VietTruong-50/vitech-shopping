@@ -158,7 +158,7 @@ public class ProductServiceImpl implements ProductService {
                     .flatMap(id -> combinedSet.stream().filter(product -> product.getProductId().equals(id)))
                     .collect(Collectors.toList());
 
-            System.out.println(matchedProducts);
+            System.out.println("matchedProducts: " + matchedProducts);
 
             // Nếu có sản phẩm được đề xuất, thêm vào kết quả
             if (!matchedProducts.isEmpty()) {
@@ -181,7 +181,7 @@ public class ProductServiceImpl implements ProductService {
         Authentication authentication = securityContext.getAuthentication();
         Optional<User> user = userRepository.findByEmail(authentication.getName());
 
-        return productRepository.getRecentView(10, user.get().getId());
+        return user.map(value -> productRepository.getRecentView(10, value.getId())).orElse(null);
     }
 
 

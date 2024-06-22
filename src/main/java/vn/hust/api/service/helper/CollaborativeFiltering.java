@@ -90,10 +90,10 @@ public class CollaborativeFiltering {
                 if (similarity > 0) {
                     for (String item : userRatings.get(user).keySet()) {
                         // Recommend items the target user hasn't rated yet
-                        if (!userRatings.get(targetUser).containsKey(item) || userRatings.get(targetUser).get(item) == 0.0) {
+//                        if (!userRatings.get(targetUser).containsKey(item) || userRatings.get(targetUser).get(item) == 0.0) {
                             // Merge the item into the recommendations map with weighted scores
                             recommendations.merge(item, userRatings.get(user).get(item) * similarity, Double::sum);
-                        }
+//                        }
                     }
                 }
             }
