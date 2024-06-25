@@ -130,17 +130,34 @@ public class ProductRepository {
     }
 
     public List<RecommendProducts> getTopSellerProducts(int limit) {
-        // Get the start date of the current month
-        LocalDate startDate = LocalDate.now().withDayOfMonth(1);
+        // Get the current date
+        LocalDate currentDate = LocalDate.now();
 
-        // Get the end date of the current month
-        LocalDate endDate = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+        // Determine the start and end dates of the current quarter
+        int month = currentDate.getMonthValue();
+        LocalDate startDate;
+        LocalDate endDate;
+
+        if (month <= 3) {
+            startDate = LocalDate.of(currentDate.getYear(), 1, 1);
+            endDate = LocalDate.of(currentDate.getYear(), 3, 31);
+        } else if (month <= 6) {
+            startDate = LocalDate.of(currentDate.getYear(), 4, 1);
+            endDate = LocalDate.of(currentDate.getYear(), 6, 30);
+        } else if (month <= 9) {
+            startDate = LocalDate.of(currentDate.getYear(), 7, 1);
+            endDate = LocalDate.of(currentDate.getYear(), 9, 30);
+        } else {
+            startDate = LocalDate.of(currentDate.getYear(), 10, 1);
+            endDate = LocalDate.of(currentDate.getYear(), 12, 31);
+        }
 
         // Format dates as strings
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String startDateStr = startDate.format(formatter);
         String endDateStr = endDate.format(formatter);
 
+        // Call the stored procedure with the quarter dates
         var outputs = procedureCallerV3.callOneRefCursor("get_product_reports", List.of(
                 ProcedureParameter.inputParam("prs_create_date_from", String.class, !Common.isNullOrEmpty(startDate) ? startDateStr : null),
                 ProcedureParameter.inputParam("prs_create_date_to", String.class, !Common.isNullOrEmpty(endDate) ? endDateStr : null),
@@ -148,6 +165,8 @@ public class ProductRepository {
                 ProcedureParameter.inputParam("prs_type", Integer.class, 1),
                 ProcedureParameter.refCursorParam("out_cur")
         ), RecommendProducts.class);
+
+        // Return the result
         return (List<RecommendProducts>) outputs.get("out_cur");
     }
 

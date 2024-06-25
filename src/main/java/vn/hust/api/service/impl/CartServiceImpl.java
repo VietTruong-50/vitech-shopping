@@ -89,20 +89,23 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void loadSessionCartIntoUserCart(String userId, String sessionToken) {
+
         var sessionCart = new CartDetailOut(hashOperations.entries(CART_KEY + ":" + sessionToken));
 
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(CART_KEY + ":" + userId))) {
-            redisTemplate.delete(CART_KEY + ":" + userId);
-        }
+        if (!Common.isNullOrEmpty(sessionCart.getCart())) {
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(CART_KEY + ":" + userId))) {
+                redisTemplate.delete(CART_KEY + ":" + userId);
+            }
 
-        // Load session cart data into user's cart
-        for (var entry : sessionCart.getCart().entrySet()) {
-            var it = ((AddUpdateItemIn) entry.getValue());
-            it.setSessionToken(null);
+            // Load session cart data into user's cart
+            for (var entry : sessionCart.getCart().entrySet()) {
+                var it = ((AddUpdateItemIn) entry.getValue());
+                it.setSessionToken(null);
 
-            hashOperations.put(CART_KEY + ":" + userId, it.getProductId(), entry.getValue());
+                hashOperations.put(CART_KEY + ":" + userId, it.getProductId(), entry.getValue());
+            }
+            redisTemplate.delete(CART_KEY + ":" + sessionToken);
         }
-        redisTemplate.delete(CART_KEY + ":" + sessionToken);
     }
 
     @Override

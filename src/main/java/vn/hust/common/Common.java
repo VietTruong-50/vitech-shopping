@@ -4,10 +4,7 @@ import vn.hust.common.constant.ConstantString;
 
 import java.math.BigDecimal;
 import java.text.Normalizer;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Common {
@@ -33,8 +30,10 @@ public class Common {
     }
 
     public static boolean isNullOrEmpty(Object obj) {
-        return Objects.isNull(obj) || (obj instanceof String ? ((String) obj).isEmpty() :
-                (obj instanceof Collection && ((Collection<?>) obj).isEmpty()));
+        return Objects.isNull(obj) ||
+               (obj instanceof String && ((String) obj).isEmpty()) ||
+               (obj instanceof Collection && ((Collection<?>) obj).isEmpty()) ||
+               (obj instanceof Map && ((Map<?, ?>) obj).isEmpty());
     }
 
     public static String subString(String str) {
