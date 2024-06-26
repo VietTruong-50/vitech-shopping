@@ -56,24 +56,25 @@ public class OrderServiceImpl implements OrderService {
 
         orderRepository.updateOrderStatus(updateOrderStatus);
 
+        var order = orderRepository.getOrderDetail(updateOrderStatus.getOrderId(), user.get().getId());
+
        String messageContent = switch (updateOrderStatus.getOrderStatusEnum()) {
             case PENDING:
-                yield "Đơn hàng đang chờ xác nhận và xử lý";
+                yield "Đơn hàng %s đang chờ xác nhận và xử lý".formatted(order.getOrderCode());
             case CONFIRMED_AND_PROCESSING:
-                yield "Đơn hàng đã xác nhận và chờ xử lý";
+                yield "Đơn hàng %s đã xác nhận và chờ xử lý".formatted(order.getOrderCode());
             case SHIPPED:
-                yield "Đơn hàng đang trong quá trình giao hàng";
+                yield "Đơn hàng %s đang trong quá trình giao hàng".formatted(order.getOrderCode());
             case COMPLETED:
-                yield "Đơn hàng đã được giao thành công";
+                yield "Đơn hàng %s đã được giao thành công".formatted(order.getOrderCode());
             case CANCELLED:
-                yield "Đơn hàng đã bị hủy";
+                yield "Đơn hàng %s đã bị hủy";
             case REFUND:
-                yield "Đơn hàng đã được hoàn hàng trở lại cửa hàng";
+                yield "Đơn hàng %s đã được hoàn hàng trở lại cửa hàng".formatted(order.getOrderCode());
             default:
-                yield "Trạng thái đơn hàng không xác định";
+                yield "Trạng thái đơn hàng %s không xác định".formatted(order.getOrderCode());
         };
 
-        var order = orderRepository.getOrderDetail(updateOrderStatus.getOrderId(), user.get().getId());
 
         Notification notification = new Notification();
 
